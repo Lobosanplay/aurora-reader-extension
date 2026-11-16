@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Aurora Reader",
+  "version": "0.1.0",
+  "description": "Read the current page aloud on demand.",
+  "permissions": ["activeTab", "scripting"],
+  "action": { "default_title": "Open Aurora Reader" },
+  "background": { "service_worker": "background.js", "type": "module" }
+}

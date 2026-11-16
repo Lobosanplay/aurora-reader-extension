@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:host {
+  all: initial;
+  position: fixed;
+  inset: auto max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) auto;
+  z-index: 2147483647;
+  color: #f1f5f9;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+:host *, :host *::before, :host *::after { box-sizing: border-box; }
+.aurora-panel {
+  --surface: #090c17; --raised: #1b2236; --accent: #a78bfa; --mint: #2dd4bf; --muted: #aebbd0;
+  width: min(320px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  border: 1px solid #394460;
+  border-radius: 18px;
+  background: linear-gradient(155deg, #19223b, var(--surface) 50%);
+  box-shadow: 0 18px 50px #0306118c, inset 0 1px #ffffff1a;
+  color: #f1f5f9;
+}
+.aurora-header { display: flex; align-items: center; gap: 9px; padding: 13px 15px; border-bottom: 1px solid #ffffff18; }
+.aurora-header strong { font-size: 13px; letter-spacing: .01em; }
+.aurora-mark { color: var(--mint); font-size: 18px; }
+.aurora-header-actions { display: flex; margin-left: auto; gap: 3px; }
+.aurora-header-actions button { width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 21px; line-height: 1; cursor: pointer; }
+.aurora-header-actions button:hover { background: #ffffff16; color: #fff; }
+.aurora-body { padding: 20px 20px 16px; text-align: center; }
+.aurora-orb { position: relative; width: 82px; height: 82px; margin: 2px auto 16px; border-radius: 50%; background: conic-gradient(from 30deg, #2dd4bf, #6366f1 38%, #a78bfa 65%, #2dd4bf); box-shadow: inset 0 0 15px #ffffff44, 0 0 28px #6366f14b; }
+.aurora-orb__core { position: absolute; inset: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #d8ccff, #666cbd 42%, #101a3c 80%); }
+.aurora-orb--paused, .aurora-orb--error { filter: saturate(.4); box-shadow: none; }
+.aurora-orb--reading { animation: aurora-breathe 2.4s ease-in-out infinite; }
+.aurora-orb--extracting { animation: aurora-breathe 3.5s ease-in-out infinite; }
+@keyframes aurora-breathe { 50% { transform: scale(1.08); opacity: .85; } }
+.aurora-status { margin: 0 0 16px; font-weight: 600; letter-spacing: .01em; }
+.aurora-meta { display: grid; gap: 4px; margin-bottom: 18px; padding: 11px 13px; border: 1px solid #ffffff14; border-radius: 11px; background: #ffffff09; text-align: left; }
+.aurora-meta span, .aurora-meta small { color: var(--muted); font-size: 11px; }
+.aurora-meta strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; }
+.aurora-meta small { color: var(--mint); }
+.aurora-controls { display: flex; gap: 8px; }
+.aurora-controls button { min-height: 39px; border-radius: 10px; padding: 0 14px; font: inherit; font-weight: 600; cursor: pointer; }
+.aurora-primary { flex: 1; border: 1px solid #a79bff; background: #6961d7; color: #fff; }
+.aurora-primary:hover:not(:disabled) { background: #7770e3; }
+.aurora-secondary { border: 1px solid #58657f; background: #202a40; color: #f1f5f9; }
+.aurora-secondary:hover:not(:disabled) { background: #303c57; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+.aurora-error { margin: 0 0 14px; padding: 10px; border: 1px solid #ff9c9c66; border-radius: 10px; text-align: left; color: #ffd4d4; font-size: 12px; }
+.aurora-error p { margin: 0 0 7px; }
+.aurora-error button { padding: 0; border: 0; background: none; color: #c6b9ff; text-decoration: underline; cursor: pointer; }
+.aurora-checkpoint { margin: 0 0 10px; color: var(--muted); font-size: 11px; }
+.aurora-footnote { margin: 13px 0 0; color: var(--muted); font-size: 10px; }
+.aurora-panel--minimized .aurora-header { border-bottom: 0; }
+@media (prefers-reduced-motion: reduce) { .aurora-orb { animation: none !important; } }
+@media (max-width: 360px) { .aurora-body { padding: 14px; } }
