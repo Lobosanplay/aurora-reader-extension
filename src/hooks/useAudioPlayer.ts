@@ -32,7 +32,12 @@ export function useAudioPlayer(): { start: () => void; pause: () => void; resume
   return {
     start,
     pause: () => player.current?.pause(),
-    resume: () => { useReaderStore.getState().pending(useReaderStore.getState().pendingIndex ?? useReaderStore.getState().chunkIndex); player.current?.resume(); },
+    resume: () => {
+      const state = useReaderStore.getState();
+      if (state.status !== 'paused') return;
+      state.pending(state.pendingIndex ?? state.chunkIndex);
+      player.current?.resume();
+    },
     stop: () => { player.current?.stop(); useReaderStore.getState().stop(); }
   };
 }
