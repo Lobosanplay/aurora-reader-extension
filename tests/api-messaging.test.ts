@@ -93,4 +93,10 @@ describe('content API messaging', () => {
     await expect(new BackgroundApi(() => new Promise(() => undefined)).health({ timeoutMs: 1 }))
       .rejects.toMatchObject({ category: 'timeout' });
   });
+  it('rejects an invalid upload hint before sending any bytes', async () => {
+    const send = vi.fn();
+    await expect(new BackgroundApi(send).transcribe(new Blob(['RIFF'], { type: 'audio/wav' }), { language: 'not-a-tag' }))
+      .rejects.toMatchObject({ category: 'validation' });
+    expect(send).not.toHaveBeenCalled();
+  });
 });

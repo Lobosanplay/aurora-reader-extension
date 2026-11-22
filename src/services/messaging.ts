@@ -89,7 +89,8 @@ export class BackgroundApi {
     return this.request('ask', request, (value) => validateQuestionResponse(value, request), options);
   }
   async transcribe(audio: Blob, options: TranscriptionOptions = {}): Promise<TranscriptionResponse> {
-    if (!(audio instanceof Blob) || audio.type !== 'audio/wav' || audio.size === 0 || audio.size > 5_000_000) {
+    if (!(audio instanceof Blob) || audio.type !== 'audio/wav' || audio.size === 0 || audio.size > 5_000_000 ||
+      (options.language !== undefined && !/^[a-z]{2,3}(?:-[A-Z]{2})?$/.test(options.language))) {
       throw new ApiClientError('validation', 'A bounded WAV upload is required.');
     }
     const bytes = Array.from(new Uint8Array(await audio.arrayBuffer()));
