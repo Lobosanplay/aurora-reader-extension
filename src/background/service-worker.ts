@@ -1,5 +1,18 @@
 import type { ExtensionMessage } from '../types';
 import { isActivationResult } from '../services/messaging';
+import { AuroraApiClient } from '../services/api-client';
+import { createApiRouter } from './api-router';
+
+// No network request occurs until an explicitly initiated content-script message arrives.
+const configuredOrigin = import.meta.env.VITE_API_BASE_URL;
+if (configuredOrigin) {
+  const router = createApiRouter(new AuroraApiClient(configuredOrigin), chrome.runtime.id);
+  chrome.runtime.onMessage.addListener(router.listener);
+  chrome.tabs.onRemoved?.addListener(router.cancelTab);
+  chrome.tabs.onUpdated?.addListener((tabId, change) => {
+    if (change.status === 'loading') router.cancelTab(tabId);
+  });
+}
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab.id === undefined) return;
