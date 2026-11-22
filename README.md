@@ -1,12 +1,12 @@
 # Aurora Reader
 
-A small Manifest V3 extension for reading the current HTML article aloud using the browser's local Web Speech API. Phase 1 has **no backend, account, microphone, translation, or page-text upload**.
+A small Manifest V3 extension for reading the current HTML article aloud using the browser's local Web Speech API. An API transport foundation exists, but the widget still has **no account, microphone, translation, or page-text upload**.
 
 ## Stack and architecture
 
 React 19 + strict TypeScript + Zustand + Mozilla Readability + Tailwind CSS 4 + Vite 7 + Vitest. A two-pass Vite build emits a module service worker (`background.js`) and a self-contained IIFE content script (`content.js`) at stable paths referenced by `public/manifest.json`. This avoids a heavyweight extension build plugin and keeps the manifest auditable. Tailwind and component CSS are embedded as a style element **inside a closed Shadow DOM**; no site-wide stylesheet is injected.
 
-The toolbar click grants temporary `activeTab` access; the service worker injects only into the active top-level HTTP(S) tab and sends a validated open message. The content script owns extraction, a single Zustand session, the widget and speech playback. Repeated clicks reuse the mounted widget. The widget is not loaded until activation. The worker never keeps playback state. No host, storage, microphone, or offscreen permission is requested.
+The toolbar click grants temporary `activeTab` access; the service worker injects only into the active top-level HTTP(S) tab and sends a validated open message. The content script owns extraction, a single Zustand session, the widget and speech playback. Repeated clicks reuse the mounted widget. The widget is not loaded until activation. The worker never keeps playback state. An API-enabled build grants one configured API scheme/host; no storage, microphone, or offscreen permission is requested.
 
 ## Requirements and setup
 
@@ -39,9 +39,13 @@ The orb and status reflect pending speech, confirmed speech start, pause, resume
 
 The interface currently uses the browser UI language (Spanish or English). Narration uses the page's declared language if present. There is no target-language selector until translation integration. Unsupported pages include browser internal pages, extension stores, PDFs, and cross-origin frames. A restricted page cannot host the widget, so failure feedback is shown in the toolbar badge/title.
 
-## Future API boundary
+## API transport foundation (not connected to the widget)
 
-The separately owned `aurora-reader-api` is expected to eventually expose versioned translation, question-answer and transcription routes. Their payloads are **not yet agreed**; see `docs/api-contract.md`. Phase 1 makes no network calls and does not read `VITE_API_BASE_URL`; the existing `.env.example` is only a future-configuration note, not a required setting. Any later backend integration must ask consent before transmitting page text/audio and use narrowly scoped API host permissions.
+The separate `aurora-reader-api` implements the versioned contract in `docs/api-contract.md`. `src/types/api.ts` describes wire DTOs; `src/types/index.ts` remains the reader's domain model (`originalText`, `index`, etc.). No automatic mapping or upload is performed. Runtime validators reject malformed success responses, unknown properties, unsupported answer-source labels, and translation IDs/count/order/language mismatches. `AuroraApiClient` uses native `fetch`, isolated fixed paths, no credentials, client deadlines and caller aborts; errors are sanitized, categorized and retain request IDs/Retry-After where present. There are no automatic retries. Health means process availability, not provider readiness.
+
+For a local API build, copy `.env.example` to `.env.worker` (ignored by Git) or set `VITE_API_MODE=local VITE_API_BASE_URL=http://127.0.0.1:8000` in the environment before `npm run build`. Start the backend separately, and configure its `ALLOWED_ORIGINS` for the actual `chrome-extension://<id>` origin if needed. A build without a URL has **no API host permission or active API router**. Production requires an explicit HTTPS `VITE_API_BASE_URL` (without `VITE_API_MODE=local`) and a trusted browser-facing authentication gateway; the backend's `X-Aurora-API-Key` must never be bundled. Vite `VITE_` values are publicly inspectable. `dist/manifest.json` is generated with exactly one API scheme/host match pattern when configured. Chrome match patterns cannot constrain a port; the HTTP client still targets only the configured port and refuses redirects.
+
+The future caller will use `BackgroundApi` in the content context. It sends typed, operation-specific messages with random IDs to the worker; the worker checks extension sender identity, top frame, document identity and URL, validates payloads and invokes only the fixed API methods. WAV uploads cross Chrome JSON messaging as bounded byte arrays before being reconstructed in the worker; no recorder or WAV conversion is included. Abort signals do not cross the message boundary: cancellation sends a second ID-bound message, discards late replies, and clears the worker's in-memory pending entry. Tab loading/removal aborts pending requests. Worker restart/disconnect rejects or times out callers; server/provider cancellation is best-effort and cannot guarantee billing stops. The reader session remains the sole playback authority. Consent, session invalidation and bounded excerpt selection are **not implemented**; no UI calls this API yet. Do not invoke it with page content or audio before adding explicit consent.
 
 ## Validation limits
 
