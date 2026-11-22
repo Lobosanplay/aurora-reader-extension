@@ -26,7 +26,7 @@ const safeMessages: Record<ApiErrorCategory, string> = {
   cancelled: 'Request cancelled.', timeout: 'The request timed out.', unavailable: 'The API is unavailable.'
 };
 
-export function resolveApiOrigin(value: string, production = import.meta.env.PROD): string {
+export function resolveApiOrigin(value: string, production = import.meta.env.VITE_API_MODE !== 'local'): string {
   let url: URL;
   try { url = new URL(value); } catch { throw new Error('Configure a valid VITE_API_BASE_URL origin.'); }
   if (url.origin === 'null' || url.username || url.password || url.pathname !== '/' || url.search || url.hash ||

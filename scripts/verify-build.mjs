@@ -5,6 +5,15 @@ const manifest = JSON.parse(readFileSync('dist/manifest.json', 'utf8'));
 if (manifest.manifest_version !== 3 || manifest.background?.service_worker !== 'background.js') {
   throw new Error('MV3 manifest does not point to the built service worker.');
 }
+if (manifest.host_permissions?.some((permission) => permission.includes('<all_urls>'))) {
+  throw new Error('Broad API host permission is not allowed.');
+}
+const worker = readFileSync('dist/background.js', 'utf8');
+if (manifest.host_permissions?.length > 1) throw new Error('Expected at most one API host origin.');
+const permitted = manifest.host_permissions?.[0]?.replace(/\/\*$/, '');
+if (permitted && !worker.includes(permitted)) {
+  throw new Error('Worker API origin and manifest host permission disagree.');
+}
 for (const file of ['background.js', 'content.js']) {
   if (!existsSync(`dist/${file}`)) throw new Error(`Missing extension entrypoint: ${file}`);
 }
