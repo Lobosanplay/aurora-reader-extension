@@ -14,7 +14,7 @@ export const strings = {
     readOriginal: 'Read original', consentTitle: 'Share this article for translation?',
     consentBody: 'Extracted page text will go to your configured Aurora Reader backend and may be processed by an external AI provider for translation and narration.',
     confirm: 'Send & translate', cancel: 'Keep local', translationError: 'Translation unavailable',
-    privacy: 'Original reading stays in your browser. Translation sends article text only after consent.',
+    privacy: 'No Aurora upload for original reading. Translation sends article text only after consent.',
     backendDisabled: 'Translation needs a configured backend and supported languages.',
     chooseSource: 'Confirm the page language to translate.'
   },
@@ -33,7 +33,7 @@ export const strings = {
     readOriginal: 'Leer original', consentTitle: '¿Compartir este artículo para traducirlo?',
     consentBody: 'El texto extraído se enviará a tu servidor Aurora Reader configurado y podría procesarlo un proveedor externo de IA para traducirlo y narrarlo.',
     confirm: 'Enviar y traducir', cancel: 'Mantener local', translationError: 'Traducción no disponible',
-    privacy: 'La lectura original es local. La traducción solo envía texto tras tu permiso.',
+    privacy: 'La lectura original no se envía a Aurora. La traducción solo envía texto tras tu permiso.',
     backendDisabled: 'La traducción necesita un servidor configurado e idiomas admitidos.',
     chooseSource: 'Confirma el idioma de la página para traducir.'
   }
