@@ -33,7 +33,13 @@ export default defineConfig(({ mode }) => {
       }])
     ],
     // Library builds retain Node-style environment checks from React unless replaced explicitly.
-    define: { 'process.env.NODE_ENV': JSON.stringify('production') },
+    define: {
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      ...(content ? {
+        'import.meta.env.VITE_API_BASE_URL': JSON.stringify(origin ?? ''),
+        'import.meta.env.VITE_TRANSLATION_LANGUAGES': JSON.stringify(env.VITE_TRANSLATION_LANGUAGES ?? '')
+      } : {})
+    },
     // Both build passes use the same explicit configuration, never an implicit host grant.
     envDir: process.cwd(),
     publicDir: content ? false : 'public',

@@ -6,9 +6,17 @@ export const strings = {
     start: 'Start reading', pause: 'Pause', resume: 'Resume', stop: 'Stop',
     minimize: 'Minimize Aurora Reader', expand: 'Expand Aurora Reader', close: 'Close Aurora Reader',
     retry: 'Retry extraction', page: 'Current page', progress: 'Passage',
-    privacy: 'Browser voice · No upload to Aurora servers',
     checkpoint: 'Resume replays the current passage.',
-    nextCheckpoint: 'Resume begins with the next passage.'
+    nextCheckpoint: 'Resume begins with the next passage.',
+    source: 'Page language', target: 'Read in', unknown: 'Unknown — select language',
+    translate: 'Translate & read', translating: 'Translating passages',
+    translated: 'Translation ready', readTranslated: 'Read translation',
+    readOriginal: 'Read original', consentTitle: 'Share this article for translation?',
+    consentBody: 'Extracted page text will go to your configured Aurora Reader backend and may be processed by an external AI provider for translation and narration.',
+    confirm: 'Send & translate', cancel: 'Keep local', translationError: 'Translation unavailable',
+    privacy: 'Original reading stays in your browser. Translation sends article text only after consent.',
+    backendDisabled: 'Translation needs a configured backend and supported languages.',
+    chooseSource: 'Confirm the page language to translate.'
   },
   es: {
     brand: 'Aurora Reader', ready: 'Listo para leer', extracting: 'Buscando el artículo…',
@@ -17,8 +25,16 @@ export const strings = {
     start: 'Empezar a leer', pause: 'Pausar', resume: 'Reanudar', stop: 'Detener',
     minimize: 'Minimizar Aurora Reader', expand: 'Expandir Aurora Reader', close: 'Cerrar Aurora Reader',
     retry: 'Reintentar extracción', page: 'Página actual', progress: 'Fragmento',
-    privacy: 'Voz del navegador · Sin envío a Aurora',
     checkpoint: 'Al reanudar, se repite el fragmento actual.',
-    nextCheckpoint: 'Al reanudar, comienza el siguiente fragmento.'
+    nextCheckpoint: 'Al reanudar, comienza el siguiente fragmento.',
+    source: 'Idioma de la página', target: 'Leer en', unknown: 'Desconocido — elige idioma',
+    translate: 'Traducir y leer', translating: 'Traduciendo fragmentos',
+    translated: 'Traducción lista', readTranslated: 'Leer traducción',
+    readOriginal: 'Leer original', consentTitle: '¿Compartir este artículo para traducirlo?',
+    consentBody: 'El texto extraído se enviará a tu servidor Aurora Reader configurado y podría procesarlo un proveedor externo de IA para traducirlo y narrarlo.',
+    confirm: 'Enviar y traducir', cancel: 'Mantener local', translationError: 'Traducción no disponible',
+    privacy: 'La lectura original es local. La traducción solo envía texto tras tu permiso.',
+    backendDisabled: 'La traducción necesita un servidor configurado e idiomas admitidos.',
+    chooseSource: 'Confirma el idioma de la página para traducir.'
   }
 };

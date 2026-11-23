@@ -164,6 +164,44 @@ describe('useAudioPlayer lifecycle', () => {
     expect(useReaderStore.getState()).toMatchObject({ status: 'error', errorSource: 'speech' });
     expect(synth.cancel).toHaveBeenCalled();
   });
+
+  it('narrates only translated text in the target language and preserves pause/resume', () => {
+    useReaderStore.getState().setTargetLanguage('es');
+    useReaderStore.getState().requestConsent();
+    useReaderStore.getState().authorizeTranslation();
+    const operation = useReaderStore.getState().translationOperation;
+    useReaderStore.getState().beginTranslation(operation);
+    useReaderStore.getState().applyBatch(operation, [
+      { id: 'one', text: 'Primer fragmento.' }, { id: 'two', text: 'Segundo fragmento.' }
+    ]);
+    useReaderStore.getState().finishTranslation(operation);
+    controls?.start();
+    controls?.start();
+    expect(spoken).toHaveLength(1);
+    expect(spoken[0]).toMatchObject({ text: 'Primer fragmento.', lang: 'es' });
+    spoken[0].onstart?.({} as SpeechSynthesisEvent);
+    controls?.pause();
+    controls?.resume();
+    expect(spoken[1]).toMatchObject({ text: 'Primer fragmento.', lang: 'es' });
+    spoken[1].onstart?.({} as SpeechSynthesisEvent);
+    spoken[1].onend?.({} as SpeechSynthesisEvent);
+    expect(spoken[2]).toMatchObject({ text: 'Segundo fragmento.', lang: 'es' });
+    controls?.stop();
+    expect(useReaderStore.getState()).toMatchObject({ status: 'idle', chunkIndex: 0 });
+  });
+
+  it('keeps original reading local and never mixes translated chunks after changing language', () => {
+    useReaderStore.getState().setTargetLanguage('es');
+    useReaderStore.getState().requestConsent();
+    useReaderStore.getState().declineConsent();
+    controls?.start();
+    expect(spoken[0]).toMatchObject({ text: 'First passage.', lang: 'en' });
+    const oldStart = spoken[0].onstart;
+    useReaderStore.getState().setTargetLanguage('en');
+    oldStart?.({} as SpeechSynthesisEvent);
+    expect(useReaderStore.getState().status).not.toBe('reading');
+    expect(synth.cancel).toHaveBeenCalled();
+  });
 });
 
 function PlayerHarness({ onReady }: { onReady: (player: ReturnType<typeof useAudioPlayer>) => void }): React.JSX.Element {

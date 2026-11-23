@@ -4,14 +4,16 @@ import { useReaderStore } from '../stores/reader-store';
 import { AuroraOrb } from './AuroraOrb';
 import { PlayerControls } from './PlayerControls';
 import { strings } from './strings';
+import { TranslationControls } from './TranslationControls';
 
 export function AssistantWidget({ onClose, onRetry }: { onClose: () => void; onRetry: () => void }): React.JSX.Element {
   const [minimized, setMinimized] = useState(false);
-  const { status, document, chunkIndex, pendingIndex, error, errorSource } = useReaderStore();
+  const { status, document, chunkIndex, pendingIndex, error, errorSource, translationStatus } = useReaderStore();
   const player = useAudioPlayer();
   const labels = strings[(navigator.language || document?.language || '').toLowerCase().startsWith('es') ? 'es' : 'en'];
   const statusText = status === 'reading' ? labels.reading : status === 'paused' ? labels.paused
-    : status === 'extracting' ? labels.extracting : status === 'starting' ? labels.starting : status === 'error'
+    : status === 'extracting' ? labels.extracting : translationStatus === 'translating' ? labels.translating
+      : status === 'starting' ? labels.starting : status === 'error'
       ? errorSource === 'speech' ? labels.speechError : labels.error : labels.ready;
   return <section className={`aurora-panel ${minimized ? 'aurora-panel--minimized' : ''}`} aria-label={labels.brand}>
     <header className="aurora-header">
@@ -22,7 +24,7 @@ export function AssistantWidget({ onClose, onRetry }: { onClose: () => void; onR
       </div>
     </header>
     {!minimized && <div className="aurora-body">
-      <AuroraOrb state={status} />
+      <AuroraOrb state={translationStatus === 'translating' && status !== 'reading' ? 'translating' : status} />
       <p className="aurora-status" role="status">{statusText}</p>
       {document && <div className="aurora-meta">
         <span>{labels.page}</span><strong title={document.title}>{document.title}</strong>
@@ -31,8 +33,10 @@ export function AssistantWidget({ onClose, onRetry }: { onClose: () => void; onR
       {error && <div className="aurora-error" role="alert"><p>{error}</p>
         {errorSource === 'extraction' && <button type="button" onClick={onRetry}>{labels.retry}</button>}
       </div>}
-       {status === 'paused' && <p className="aurora-checkpoint">{pendingIndex !== null && pendingIndex > chunkIndex ? labels.nextCheckpoint : labels.checkpoint}</p>}
-      <PlayerControls status={status} available={!!document} speechError={errorSource === 'speech'} labels={labels} {...player} />
+      {document && <TranslationControls labels={labels} stopAudio={player.stop} startAudio={player.start} />}
+      {status === 'paused' && <p className="aurora-checkpoint">{pendingIndex !== null && pendingIndex > chunkIndex ? labels.nextCheckpoint : labels.checkpoint}</p>}
+      <PlayerControls status={status} available={!!document && translationStatus !== 'translating' &&
+        translationStatus !== 'awaiting_consent'} speechError={errorSource === 'speech'} labels={labels} {...player} />
       <p className="aurora-footnote">{labels.privacy}</p>
     </div>}
   </section>;
