@@ -11,3 +11,13 @@ Automated tests and the build smoke check do not replace a real extension run. R
 7. Navigate all buttons with keyboard only. Check focus visibility, status announcements, narrow window width, 200% zoom, `prefers-reduced-motion`, and that neither host styling nor widget styling leaks across the Shadow DOM boundary.
 
 Record failures with the page type, reproduction steps and browser version. Browser speech voices and PDF viewer script restrictions are platform-dependent.
+
+## Translation verification (both browsers; local test backend, never paid requests by default)
+
+Build with `.env.worker` configured for a loopback API and an explicit language intersection, e.g. `VITE_TRANSLATION_LANGUAGES=en,es`. Set backend `SUPPORTED_LANGUAGES` to include the same codes and configure the extension origin as needed. Use a mock/test provider or authorized test environment; do not infer real inference success from the offline suite.
+
+1. Open an English and then a Spanish article. Verify the declared source hint, correction selector, target selector, and unknown-language prompt. Open/minimize/change target/decline consent; Network must show **no** translation request. Same-language Start reading must remain local.
+2. Select a different target; inspect the consent text with keyboard/screen reader. Decline, then start original narration. Repeat and confirm. Only after confirmation should the worker send `POST /api/v1/translate`, with IDs/text/language tags but no URL/title; inspect the actual request.
+3. On a document spanning several batches, verify sequential requests, passage progress, complete translated narration with the target voice, Pause → Resume checkpoint and Stop. Trigger a controlled backend failure in a later batch, retry, and check that only unfinished chunks are resent. Switch to Read original and verify the original voice/text.
+4. During a pending batch, Stop, close, change target, navigate, and replace article content at the same URL. A late response must not update the new session or play speech; no additional batch may be sent after cancellation. Reopening a different document requires a new confirmation.
+5. Check unavailable backend, timeout, rate limit, unsupported language, malformed response, provider error and long/oversized passage states; ensure actionable errors, no original-text corruption and no private text in logs. Verify 200% zoom, narrow width, keyboard focus, reduced-motion orb, Shadow DOM isolation and the generated manifest's single narrow backend permission.

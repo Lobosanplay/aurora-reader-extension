@@ -19,15 +19,16 @@ export class SpeechPlayer {
   private chunks: TextChunk[] = [];
   private language: string | null = null;
   private checkpoint = 0;
+  private mode: 'original' | 'translated' = 'original';
 
   constructor(private readonly synth: SpeechSynthesis = window.speechSynthesis,
     private readonly makeUtterance: (text: string) => SpeechSynthesisUtterance = (text) => new SpeechSynthesisUtterance(text)) {}
 
-  start(chunks: TextChunk[], from: number, language: string | null, events: SpeechEvents): void {
-    this.play(chunks, from, language, events, false);
+  start(chunks: TextChunk[], from: number, language: string | null, events: SpeechEvents, mode: 'original' | 'translated' = 'original'): void {
+    this.play(chunks, from, language, events, false, mode);
   }
 
-  private play(chunks: TextChunk[], from: number, language: string | null, events: SpeechEvents, resuming: boolean): void {
+  private play(chunks: TextChunk[], from: number, language: string | null, events: SpeechEvents, resuming: boolean, mode: 'original' | 'translated'): void {
     this.stop();
     if (!this.synth || typeof this.synth.speak !== 'function') {
       events.onError('Speech playback is unavailable in this browser.');
@@ -37,11 +38,16 @@ export class SpeechPlayer {
       events.onError('There is no text to read.');
       return;
     }
+    if (mode === 'translated' && chunks.some((chunk) => !chunk.translatedText?.trim())) {
+      events.onError('Translation is incomplete. Retry or read the original text.');
+      return;
+    }
     const token = this.generation;
     this.active = true;
     this.events = events;
     this.chunks = chunks;
     this.language = language;
+    this.mode = mode;
     this.checkpoint = from;
     const speak = (index: number): void => {
       if (token !== this.generation) return;
@@ -49,7 +55,7 @@ export class SpeechPlayer {
       if (!chunks[index].originalText.trim()) { speak(index + 1); return; }
       this.checkpoint = index;
       try {
-        const utterance = this.makeUtterance(chunks[index].translatedText || chunks[index].originalText);
+        const utterance = this.makeUtterance(mode === 'translated' ? chunks[index].translatedText! : chunks[index].originalText);
         this.utterance = utterance;
         const voices = this.synth.getVoices();
         const match = language && voices.find((voice) => voice.lang.toLowerCase() === language.toLowerCase())
@@ -119,7 +125,7 @@ export class SpeechPlayer {
 
   resume(): void {
     if (!this.paused || !this.events) return;
-    this.play(this.chunks, this.checkpoint, this.language, this.events, true);
+    this.play(this.chunks, this.checkpoint, this.language, this.events, true, this.mode);
   }
 
   stop(): void {
